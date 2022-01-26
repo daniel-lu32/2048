@@ -2,287 +2,434 @@ import java.util.Random;
 
 public class Board {
  
-	private int[][] board; // holds state of game
-	private Random rnd = new Random(0); // setup random # generator
-	
-	//What instance variable can you add to keep track of the size or the number of tiles occupied?
+	private int[][] board;
+	private int size;
+	private Random rnd = new Random(0);
 	
 	/* default constructor for board */
-	// constructors must match exactly the name
-	// of the class.
 	public Board() {
-		
-		// instantiate the board
 		board = new int[4][4];
+		size = 0;
 		populateOne();
 		populateOne();
 	}
-
+	
 	/*
-	 * return a String representation of the 2D array board
+	 * returns a String representation of the 2D array board
 	 * each row should be in its own line
 	 * 
 	 * Example:
-	 * 
-	 * { {1, 2, 3}, {4, 5, 6}} -> 1 2 3
-	 * 
+	 * { {1, 2, 3}, {4, 5, 6} } ->
+	 * 1 2 3
 	 * 4 5 6
+	 * 
+	 * use the String formatter to pad the numbers with leading 0s so that the print out does not become jagged
+	 * 
+	 * Example:
+	 * String str = String.format("%04d", 9); -> 0009
 	 */
-
-	
-	// overriding a method is when a "child"
-	// class implement the exact same method
-	// that its parent class has
 	public String toString() {
-		
-		/*
-		 * Use the String formatter to pad the numbers with leading 0s
-		 * so that the print out does not become jagged
-		 * An example is shown below. 
-		 * String str = String.format("%04d", 9);  // 0009  
-		 * int x = 30;
-		 * System.out.println(String.format("%04d",x));
-		 *     
-		 */
-		
-		//setup loops to visit
-		//every spot possible
-		
-		
+		for (int row = 0; row < board.length; row++) {
+			for (int col = 0; col < board[row].length; col++) {
+				System.out.print(String.format("%04d", board[row][col]) + " ");
+			}
+			System.out.println();
+		}
 		
 		return "";
 	}
-
+	
 	/*
-	 * set one of the empty spaces (at random)
-	 * to a 2 or 4 (90/10 chance). an empty spot is defined to be a 0 element
-	 * Must use the Random class object rnd.
-	 * Example Use of rnd object.
+	 * set one of the empty spaces (at random) to a 2 or 4
+	 * an empty spot is defined to be a 0 element
+	 * must use the Random class object rnd
 	 * 
-	 * int randomNum = rnd.nextInt(10); //returns a number in range [0 10) (not
-	 * inclusive on the 10)
+	 * Example:
+	 * int randomNumber = rnd.nextInt(10); -> returns a number in the range [0 10)
 	 */
-
 	public void populateOne() {
+		int oneTen = (int) (Math.random()*10+1);
+		int twoFour;
+		if (oneTen == 1) {
+			twoFour = 4;
+		} else {
+			twoFour = 2;
+		}
 		
-		// is there an empty spot?
-		// for randomness, generate a row and column
-		// check if that tile is empty, if it is NOT empty,
-		// generate another set of row and column
-		// what happens if the entire board is full??! 
-		
-		
-		
-			
+		boolean emptyTileFound = false;
+		while (!emptyTileFound && size < 16) {
+			int row = rnd.nextInt(4)+0;
+			int col = rnd.nextInt(4)+0;
+			if (board[row][col] == 0) {
+				emptyTileFound = true;
+				board[row][col] = twoFour;
+			}
+		}
 
+		size++;
+	}
+	
+	/* sets every element on board to 0 */
+	public void eraseBoard() {
+		for (int row = 0; row < board.length; row++) {
+			for (int col = 0; col < board[row].length; col++) {
+				board[row][col] = 0;
+			}
+		}
 	}
 
 	/*
+	 * given an array of integers, slide all non-zero elements to the right
 	 * 
-	 * Given an array of integers, slide all non-zero elements to the right.
-	 * zero elements are considered open spots.
-	 * example:
-	 * 
-	 * [0 2 0 2]->[0 0 2 2]
-	 * [2 8 0 2]->[0 2 8 2]
-	 * [4 0 0 0]->[0 0 0 4]
+	 * Example:
+	 * [0 2 0 2] -> [0 0 2 2]
+	 * [2 8 0 2] -> [0 2 8 2]
+	 * [4 0 0 0] -> [0 0 0 4]
 	 */
-
 	public void slideRight(int[] row) {
-		
-
-	
+		int zeroCount = 0;
+		for (int i = 0; i < row.length; i++) {
+			if (row[i] == 0) {
+				zeroCount++;
+			}
+		}
+		int[] noZeroes = new int[row.length - zeroCount];
+		int noZeroesIndex = 0;
+		for (int i = 0; i < row.length; i++) {
+			if (row[i] != 0) {
+				noZeroes[noZeroesIndex] = row[i];
+				noZeroesIndex++;
+			}
+		}
+		for (int i = 0; i < zeroCount; i++) {
+			row[i] = 0;
+		}
+		for (int i = zeroCount; i < row.length; i++) {
+			row[i] = noZeroes[i - zeroCount];
+		}
 	}
 
 	/*
-	 * 
-	 * Move the numbers as far to the right as they can go
-	 * aka the numbers are trying to move to the right-most
-	 * empty spaces. This method must utilize the slideRight(int[] row) method
-	 * must utilize the helper method above for full credit.
-	 * param: a valid row of 2048 where 0s are "empty" spots
-	 * effect: row is modified so all numbers are to the right side
-	 * return: none
+	 * move the numbers as far to the right as they can go
+	 * the numbers are trying to move to the right-most empty spaces
 	 */
-
 	public void slideRight() {
-
-		// go through 2D array, move all digits as far right as possible
-		//setup a loop to grab ONE row at a time from 2d array board
-	
-		
+		for (int row = 0; row < board.length; row++) {
+			slideRight(board[row]);
+		}
 	}
 
-	/**
-	 * Given an array of integers, slide all non-zero elements to the left.
-	 * zero elements are considered open spots.
-	 * example:
+	/*
+	 * given an array of integers, slide all non-zero elements to the left
 	 * 
+	 * Example:
 	 * [0 2 0 2] -> [2 2 0 0]
 	 * [2 0 0 2] -> [2 2 0 0]
 	 */
-
-	public void slideLeft(int[] arr) {
-		
-		
-		
+	public void slideLeft(int[] row) {
+		int zeroCount = 0;
+		for (int i = 0; i < row.length; i++) {
+			if (row[i] == 0) {
+				zeroCount++;
+			}
+		}
+		int[] noZeroes = new int[row.length - zeroCount];
+		int noZeroesIndex = 0;
+		for (int i = 0; i < row.length; i++) {
+			if (row[i] != 0) {
+				noZeroes[noZeroesIndex] = row[i];
+				noZeroesIndex++;
+			}
+		}
+		for (int i = 0; i < noZeroes.length; i++) {
+			row[i] = noZeroes[i];
+		}
+		for (int i = noZeroes.length; i < row.length; i++) {
+			row[i] = 0;
+		}
 	}
 
-	/*
-	 * Slide all the numbers to the left so that
-	 * 
-	 * all of the empty spaces are on the right side
-	 */
-
+	/* slide all the numbers to the left so that all of the empty spaces are on the right side */
 	public void slideLeft() {
-		
-		// grabbing a row from a 2D array
-		// if it's called arr then arr[i] grabs ONE row!
-	
-		
-		
-		//visit every single row in the 2D array
-		//call the slideLeft method that takes in one argument
-		
-		
+		for (int i = 0; i < board.length; i++) {
+			slideLeft(board[i]);
+		}
 	}
 
-	/**
-	 * Given a 2D array and a column number, return a 1D array representing the
-	 * elements in the given column number.
-	 */
-	public int[] getCol(int[][] data, int c) {
-		
-		//you can also add print out statements here
-		return new int[0];
-		
+	/* given a 2D array and a column number, return a 1D array representing the elements in the given column number */
+	public int[] getCol(int[][] data, int col) {
+		int[] column = new int[data.length];
+		for (int row = 0; row < data.length; row++) {
+			column[row] = data[row][col];
+		}
+		return column;
 	}
 
-	/**
-	 * Given an array of integers, slide all non-zero elements to the top.
-	 * 
-	 * zero elements are considered open spots.
-	 */
-
+	/* given an array of integers, slide all non-zero elements to the top */
 	public void slideUp(int[] arr) {
-		/* calls a helper method */
-		// do not rewrite logic you already have!
+		slideLeft(arr);
 	}
 
-	/*
-	 * 
-	 * Slide all elements in the board towards the top.
-	 * 
-	 * You must use slideUp and getCol for full credit.
-	 */
+	/* slide all elements in the board towards the top */
 	public void slideUp() {
-		
-		//visit every column index
-		//grab each column as an array using getCol -> keep track of it in a 1d array
-		// variable/reference
-		//have slideLeft perform manipulation on the array
-		// copy over the 1D array representation of the column
-		// back to the 2D board array
-
-		
-		
-		
+		for (int col = 0; col < board[0].length; col++) {
+			int[] column = getCol(board, col);
+			slideUp(column);
+			for (int row = 0; row < board.length; row++) {
+				board[row][col] = column[row];
+			}
+		}
 	}
-
+	/* given an array of integers, slide all non-zero elements to the bottom */
 	public void slideDown(int[] arr) {
-
-		
+		slideRight(arr);
 	}
 
-	/*
-	 * slide all the numbers down so that any
-	 * empty space is at the top
-	 * You must use slideDown and getCol for full credit.
-	 */
-
+	/* slide all the numbers down so that any empty space is at the top */
 	public void slideDown() {
-
+		for (int i = 0; i < board[0].length; i++) {
+			int[] column = getCol(board, i);
+			slideDown(column);
+			for (int j = 0; j < board.length; j++) {
+				board[j][i] = column[j];
+			}
+		}
 	}
 
 	/*
-	 * Given the 2D array, board, combineRight will take adjacent numbers that
-	 * are the same and combine them (add them).
-	 * After adding them together, one of the numbers is zeroed out. For
-	 * example, if row 0 contained [0 0 4 4],
-	 * a call to combineRight will produce [0 0 0 8]. If row 1 contained [2 2 2
-	 * 2], a call to combineRight will
-	 * produce [0 4 0 4].
-	 * 
-	 * Notice that the left element is zeroed out.
+	 * given the 2D array, board, combineRight will take adjacent numbers that are the same and combine them (add them)
+	 * after adding them together, one of the numbers is zeroed out
+	 * for example, if row 0 contained [0 0 4 4], a call to combineRight will produce [0 0 0 8]
+	 * if row 1 contained [2 2 2 2], a call to combineRight will produce [0 4 0 4]
+	 * notice that the left element is zeroed out
 	 */
-
 	public void combineRight() {
-
+		for (int row = 0; row < board.length; row++) {
+			for (int col = board[row].length - 1; col > 0; col--) {
+				if (board[row][col] == board[row][col - 1]) {
+					board[row][col] *= 2;
+					board[row][col - 1] = 0;
+					col--;
+					size--;
+				}
+			}
+		}
 	}
 
-	/*
-	 * same behavior as combineRight but the right element is zeroed out when
-	 * two elements are combined
-	 */
-
+	/* same behavior as combineRight but the right element is zeroed out when two elements are combined */
 	public void combineLeft() {
-		
+		for (int row = 0; row < board.length; row++) {
+			for (int col = 0; col < board[row].length - 1; col++) {
+				if (board[row][col] == board[row][col + 1]) {
+					board[row][col] *= 2;
+					board[row][col + 1] = 0;
+					col++;
+					size--;
+				}
+			}
+		}
 	}
 	
-	/*
-	 * same behavior as combineRight but the bottom element is zeroed out when
-	 * two elements are combined
-	 */
-
+	/* same behavior as combineRight but the bottom element is zeroed out when two elements are combined */
 	public void combineUp() {
-
+		for (int col = 0; col < board[0].length; col++) {
+			for (int row = 0; row < board.length - 1; row++) {
+				if (board[row][col] == board[row + 1][col]) {
+					board[row][col] *= 2;
+					board[row + 1][col] = 0;
+					row++;
+					size--;
+				}
+			}
+		}
 	}
 
-	/*
-	 * same behavior as combineRight but the top element is zeroed out when two
-	 * elements are combined
-	 */
-
+	/* same behavior as combineRight but the top element is zeroed out when two elements are combined */
 	public void combineDown() {
-
+		for (int col = 0; col < board[0].length; col++) {
+			for (int row = board.length - 1; row > 0; row--) {
+				if (board[row][col] == board[row - 1][col]) {
+					board[row][col] *= 2;
+					board[row - 1][col] = 0;
+					row--;
+					size--;
+				}
+			}
+		}
 	}
-
 	
-	
-	/* reminder: these are the methods that will ultimately invoke
-	 * a series of methods
-	 * 
-	 * the combine and slide methods should not worry about each other's methods
+	/* 
+	 * slide left, combine left, and slide left again
+	 * call the populateOne method if the board changed after the move
 	 */
 	public void left() {
-		//1) numbers slide to the left
-		//2) combine
-		//3) slide
+		int[][] beforeMove = new int[4][4];
+		for (int row = 0; row < board.length; row++) {
+			for (int col = 0; col < board[row].length; col++) {
+				beforeMove[row][col] = board[row][col];
+			}
+		}
+		slideLeft();
+		combineLeft();
+		slideLeft();
+		int[][] afterMove = new int[4][4];
+		for (int row = 0; row < board.length; row++) {
+			for (int col = 0; col < board[row].length; col++) {
+				afterMove[row][col] = board[row][col];
+			}
+		}
+		boolean boardChanged = false;
+		for (int row = 0; row < board.length; row++) {
+			for (int col = 0; col < board[row].length; col++) {
+				if (beforeMove[row][col] != afterMove[row][col]) {
+					boardChanged = true;
+				}
+			}
+		}
+		if (boardChanged) {
+			populateOne();
+		}
 	}
-
+	
+	/* 
+	 * slide right, combine right, and slide right again
+	 * call the populateOne method if the board changed after the move
+	 */
 	public void right() {
-
+		int[][] beforeMove = new int[4][4];
+		for (int row = 0; row < board.length; row++) {
+			for (int col = 0; col < board[row].length; col++) {
+				beforeMove[row][col] = board[row][col];
+			}
+		}
+		slideRight();
+		combineRight();
+		slideRight();
+		int[][] afterMove = new int[4][4];
+		for (int row = 0; row < board.length; row++) {
+			for (int col = 0; col < board[row].length; col++) {
+				afterMove[row][col] = board[row][col];
+			}
+		}
+		boolean boardChanged = false;
+		for (int row = 0; row < board.length; row++) {
+			for (int col = 0; col < board[row].length; col++) {
+				if (beforeMove[row][col] != afterMove[row][col]) {
+					boardChanged = true;
+				}
+			}
+		}
+		if (boardChanged) {
+			populateOne();
+		}
 	}
-
+	
+	/* 
+	 * slide up, combine up, and slide up again
+	 * call the populateOne method if the board changed after the move
+	 */
 	public void up() {
-
+		int[][] beforeMove = new int[4][4];
+		for (int row = 0; row < board.length; row++) {
+			for (int col = 0; col < board[row].length; col++) {
+				beforeMove[row][col] = board[row][col];
+			}
+		}
+		slideUp();
+		combineUp();
+		slideUp();
+		int[][] afterMove = new int[4][4];
+		for (int row = 0; row < board.length; row++) {
+			for (int col = 0; col < board[row].length; col++) {
+				afterMove[row][col] = board[row][col];
+			}
+		}
+		boolean boardChanged = false;
+		for (int row = 0; row < board.length; row++) {
+			for (int col = 0; col < board[row].length; col++) {
+				if (beforeMove[row][col] != afterMove[row][col]) {
+					boardChanged = true;
+				}
+			}
+		}
+		if (boardChanged) {
+			populateOne();
+		}
 	}
-
+	
+	/* 
+	 * slide down, combine down, and slide down again
+	 * call the populateOne method if the board changed after the move
+	 */
 	public void down() {
-
+		int[][] beforeMove = new int[4][4];
+		for (int row = 0; row < board.length; row++) {
+			for (int col = 0; col < board[row].length; col++) {
+				beforeMove[row][col] = board[row][col];
+			}
+		}
+		slideDown();
+		combineDown();
+		slideDown();
+		int[][] afterMove = new int[4][4];
+		for (int row = 0; row < board.length; row++) {
+			for (int col = 0; col < board[row].length; col++) {
+				afterMove[row][col] = board[row][col];
+			}
+		}
+		boolean boardChanged = false;
+		for (int row = 0; row < board.length; row++) {
+			for (int col = 0; col < board[row].length; col++) {
+				if (beforeMove[row][col] != afterMove[row][col]) {
+					boardChanged = true;
+				}
+			}
+		}
+		if (boardChanged) {
+			populateOne();
+		}
 	}
 	
-	
-
+	/* 
+	 * check the board to see if any possible moves can be made
+	 * if any element in the array is 0, then the game is not over
+	 * if any two elements in the array are matching left to right, the game is not over
+	 * if any two elements in the array are matching up and down, the game is not over
+	 * otherwise, the game is over
+	 */
 	public boolean gameOver() {
-		return false;
+		for (int row = 0; row < board.length; row++) {
+			for (int col = 0; col < board[row].length; col++) {
+				if (board[row][col] == 0) {
+					return false;
+				}
+			}
+		}
+		
+		for (int row = 0; row < board.length; row++) {
+			for (int col = 0; col < board[row].length - 1; col++) {
+				if (board[row][col] == board[row][col + 1]) {
+					return false;
+				}
+			}
+		}
+		for (int col = 0; col < board[0].length; col++) {
+			for (int row = 0; row < board.length - 1; row++) {
+				if (board[row][col] == board[row + 1][col]) {
+					return false;
+				}
+			}
+		}
+		
+		return true;
 	}
-
+	
+	/* return the board as a 2D array */
 	public int[][] getBoard() {
 		return board;
 	}
 
-	// populate with a given 2d array
+	/* populate with a given 2D array */
 	public void populate(int[][] arr) {
 		for (int r = 0; r < arr.length; r++) {
 			for (int c = 0; c < arr[r].length; c++) {

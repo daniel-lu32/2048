@@ -78,14 +78,13 @@ public class BoardGUI extends JPanel implements KeyListener, ActionListener{
 	}
 	
 	public void update() {
-		for(int r = 0; r < 4;r++) {
-			for(int c =0; c < 4; c++) {
+		for (int r = 0; r < 4; r++) {
+			for (int c = 0; c < 4; c++) {
 				b[r][c].setValue(data.getBoard()[r][c]);
 				b[r][c].setBackground(colors[b[r][c].cindex]);
 			}
 		}
 	}
-	
 	
 	@Override
 	public void keyPressed(KeyEvent arg0) {
@@ -98,28 +97,24 @@ public class BoardGUI extends JPanel implements KeyListener, ActionListener{
 		System.out.println(Arrays.toString(result));
 		
 		switch(arg0.getKeyCode()) {
-			
-			//slide right
-			case 39:
-				data.slideRight();
+			case 39: // right
+				data.right();
 				break;
 				
-			case 37: //left
-				data.slideLeft();
+			case 37: // left
+				data.left();
 				break;
-			case 38: //up
-				//what to do if keyCode is 38?
 				
-				
+			case 38: // up
+				data.up();
 				break;
-			case 40: //down
 				
+			case 40: // down
+				data.down();
 				break;
 		}
 		
-		data.populateOne();
 		update();
-		
 		
 		/** reset the game if all tiles are populated **/
 		if(data.gameOver()) {
@@ -127,8 +122,6 @@ public class BoardGUI extends JPanel implements KeyListener, ActionListener{
 			update();
 		}
 	}
-
-
 
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
@@ -142,20 +135,16 @@ public class BoardGUI extends JPanel implements KeyListener, ActionListener{
 		data.populateOne();
 		update();
 		*/
-		
 	}
 
 	@Override
 	public void keyReleased(KeyEvent arg0) {
 		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void keyTyped(KeyEvent arg0) {
 		// TODO Auto-generated method stub
-		
 	}
-	
 	
 }
