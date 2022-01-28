@@ -4,7 +4,7 @@ public class Board {
  
 	private int[][] board;
 	private int size;
-	private Random rnd = new Random(0);
+	private Random rnd = new Random();
 	
 	/* default constructor for board */
 	public Board() {
@@ -436,6 +436,205 @@ public class Board {
 				board[r][c] = arr[r][c];
 			}
 		}
+	}
+	
+	public static int nextMove(int[][] b) {
+		int matchesLR = 0;
+		int matchesUD = 0;
+		boolean ableToMoveLeft = false;
+		boolean ableToMoveRight = false;
+		boolean ableToMoveUp = false;
+		boolean ableToMoveDown = false;
+		int numPossibleMoves = 0;
+		
+		// count nonzero matching elements in each row
+		for (int row = 0; row < b.length; row++) {
+			for (int col = 0; col < b[row].length - 1; col++) {
+				if (b[row][col] == b[row][col + 1] && b[row][col] != 0) {
+					matchesLR++;
+				}
+			}
+		}
+		
+		// count nonzero matching elements in each column
+		for (int col = 0; col < b[0].length; col++) {
+			for (int row = 0; row < b.length - 1; row++) {
+				if (b[row][col] == b[row + 1][col] && b[row][col] != 0) {
+					matchesUD++;
+				}
+			}
+		}
+		
+		// determine whether or not a left move is possible
+		for (int row = 0; row < b.length; row++) {
+			int minIndexZero = 3;
+			int maxIndexNonzero = 0;
+			for (int col = b[row].length - 1; col >= 0; col--) {
+				if (b[row][col] == 0) {
+					minIndexZero = col;
+				}
+			}
+			for (int col = 0; col < b[row].length; col++) {
+				if (b[row][col] != 0) {
+					maxIndexNonzero = col;
+				}
+			}
+			if (minIndexZero < maxIndexNonzero || matchesLR > 0) {
+				ableToMoveLeft = true;
+			}
+		}
+		
+		// determine whether or not a right move is possible
+		for (int row = 0; row < b.length; row++) { // 0 0 0 0 max0 = 3 min!0 = 3
+			int maxIndexZero = 0;
+			int minIndexNonzero = 3;
+			for (int col = 0; col < b[row].length; col++) {
+				if (b[row][col] == 0) {
+					maxIndexZero = col;
+				}
+			}
+			for (int col = b[row].length - 1; col >= 0; col--) {
+				if (b[row][col] != 0) {
+					minIndexNonzero = col;
+				}
+			}
+			if (minIndexNonzero < maxIndexZero || matchesLR > 0) {
+				ableToMoveRight = true;
+			}
+		}
+		
+		// determine whether or not an up move is possible
+		for (int col = 0; col < b[0].length; col++) {
+			int minIndexZero = 3;
+			int maxIndexNonzero = 0;
+			for (int row = b.length - 1; row >= 0; row--) {
+				if (b[row][col] == 0) {
+					minIndexZero = row;
+				}
+			}
+			for (int row = 0; row < b.length; row++) {
+				if (b[row][col] != 0) {
+					maxIndexNonzero = row;
+				}
+			}
+			if (minIndexZero < maxIndexNonzero || matchesUD > 0) {
+				ableToMoveUp = true;
+			}
+		}
+		
+		// determine whether or not a down move is possible
+		for (int col = 0; col < b[0].length; col++) {
+			int maxIndexZero = 0;
+			int minIndexNonzero = 3;
+			for (int row = 0; row < b.length; row++) {
+				if (b[row][col] == 0) {
+					maxIndexZero = row;
+				}
+			}
+			for (int row = b.length - 1; row >= 0; row--) {
+				if (b[row][col] != 0) {
+					minIndexNonzero = row;
+				}
+			}
+			if (minIndexNonzero < maxIndexZero || matchesUD > 0) {
+				ableToMoveDown = true;
+			}
+		}
+		
+		// count the number of possible moves
+		if (ableToMoveLeft) numPossibleMoves++;
+		if (ableToMoveRight) numPossibleMoves++;
+		if (ableToMoveUp) numPossibleMoves++;
+		if (ableToMoveDown) numPossibleMoves++;
+		
+		// return the only possible move if applicable
+		if (numPossibleMoves == 1) {
+			if (ableToMoveLeft) return 0;
+			if (ableToMoveRight) return 1;
+			if (ableToMoveUp) return 2;
+			if (ableToMoveDown) return 3;
+		}
+		
+		// return the best move out of 2 possible moves if applicable
+		if (numPossibleMoves == 2) {
+			boolean leftRight = false;
+			boolean upDown = false;
+			if (ableToMoveLeft) leftRight = true;
+			if (ableToMoveRight) leftRight = true;
+			if (ableToMoveUp) upDown = true;
+			if (ableToMoveDown) upDown = true;
+			if (leftRight && !upDown) {
+				return 1;
+			}
+			if (!leftRight && upDown) {
+				return 3;
+			}
+			if (leftRight && upDown) {
+				boolean left = false;
+				boolean right = false;
+				boolean up = false;
+				boolean down = false;
+				if (ableToMoveLeft) left = true;
+				if (ableToMoveRight) right = true;
+				if (ableToMoveUp) up = true;
+				if (ableToMoveDown) down = true;
+				if (matchesLR >= matchesUD) {
+					if (left) {
+						return 0;
+					} else {
+						return 1;
+					}
+				} else {
+					if (up) {
+						return 2;
+					} else {
+						return 3;
+					}
+				}
+			}
+		}
+		
+		// return the best move out of 3 possible moves if applicable
+		if (numPossibleMoves == 3) {
+			boolean left = false;
+			boolean right = false;
+			boolean up = false;
+			boolean down = false;
+			if (ableToMoveLeft) left = true;
+			if (ableToMoveRight) right = true;
+			if (ableToMoveUp) up = true;
+			if (ableToMoveDown) down = true;
+			if (matchesLR >= matchesUD) {
+				if (left && right) {
+					return 1;
+				}
+				if (left && !right) {
+					return 0;
+				} else {
+					return 1;
+				}
+			} else {
+				if (up && down) {
+					return 3;
+				}
+				if (up && !down) {
+					return 2;
+				} else {
+					return 3;
+				}
+			}
+		}
+		
+		// determine the best move if every move is possible
+		if (numPossibleMoves == 4) {
+			if (matchesLR >= matchesUD) {
+				return 1;
+			} else {
+				return 3;
+			}
+		}
+		
+		return -1;
 	}
 
 }
